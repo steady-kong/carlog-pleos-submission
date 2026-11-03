@@ -1,6 +1,9 @@
 package kr.carlog.pleos
 
 import kotlin.math.roundToInt
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 /** Distances are km, fuel is L, money is KRW; timestamps are UTC epoch milliseconds. */
 data class Fuel(val date: Long, val odometer: Double, val amount: Double, val full: Boolean, val deleted: Boolean = false)
@@ -32,7 +35,42 @@ fun estimateOdometer(readings: List<Reading>, initial: Double, now: Long): Doubl
     return (base.km + daily * ((now - base.date) / 86400000.0).coerceAtLeast(0.0)).roundToInt().toDouble()
 }
 
+data class MonthlySpend(val month: String, val total: Long)
+data class SpendingStats(
+    val total: Long,
+    val fuel: Long,
+    val maintenance: Long,
+    val other: Long,
+    val byCategory: Map<String, Long>,
+    val distance: Double,
+    val costPerKm: Double?,
+    val monthly: List<MonthlySpend>,
+)
+
+/** Wallet totals include fuel, maintenance, and general expenses without double-counting. */
+fun spendingStats(records: List<RecordEntity>): SpendingStats {
+    val active = records.filter { it.cost >= 0 }
+    val fuel = active.filter { it.type == "주유" }.sumOf { it.cost }
+    val maintenance = active.filter { it.type == "정비" }.sumOf { it.cost }
+    val other = active.filter { it.type == "지출" }.sumOf { it.cost }
+    val categories = active.filter { it.type == "지출" }
+        .groupBy { it.category?.takeIf(String::isNotBlank) ?: "기타" }
+        .mapValues { (_, values) -> values.sumOf { it.cost } }
+        .toSortedMap(compareByDescending<String> { categoriesOrder(active, it) }.thenBy { it })
+    val odometers = active.map { it.odometer }.filter { it.isFinite() }
+    val distance = if (odometers.size >= 2) (odometers.max() - odometers.min()).coerceAtLeast(0.0) else 0.0
+    val months = active.groupBy {
+        DateTimeFormatter.ofPattern("yyyy-MM").withZone(ZoneOffset.UTC).format(Instant.ofEpochMilli(it.timestamp))
+    }.map { (month, entries) -> MonthlySpend(month, entries.sumOf { it.cost }) }.sortedBy { it.month }
+    return SpendingStats(fuel + maintenance + other, fuel, maintenance, other, categories, distance,
+        if (distance > 0) (fuel + maintenance + other).toDouble() / distance else null, months)
+}
+
+private fun categoriesOrder(records: List<RecordEntity>, category: String): Long =
+    records.asSequence().filter { it.type == "지출" && (it.category?.takeIf(String::isNotBlank) ?: "기타") == category }.sumOf { it.cost }
+
 data class Signal(val timestamp: Long, val name: String, val value: Double, val unit: String)
+fun eventWindow(at: Long): LongRange = (at - 60_000)..(at + 60_000)
 /** Uses sample timestamps, keeps the inclusive 60-second boundary, and accepts out-of-order signals. */
 class RingBufferManager(private val windowMs: Long = 60_000) {
     private val samples = mutableListOf<Signal>()

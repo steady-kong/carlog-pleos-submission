@@ -21,6 +21,11 @@ class DomainTest {
         assertEquals(100.0, estimateOdometer(listOf(Reading(0, 0.0), Reading(13 * day, 100.0)), 0.0, 14 * day), 0.0)
         assertEquals(4500.0, estimateOdometer(listOf(Reading(0, 0.0), Reading(14 * day, 4200.0)), 0.0, 15 * day), 0.0)
     }
+    @Test fun eventWindowIncludesBoundariesAndRejectsOutliers() {
+        val window = eventWindow(100_000)
+        assertTrue(40_000L in window); assertTrue(160_000L in window)
+        assertFalse(39_999L in window); assertFalse(160_001L in window)
+    }
     @Test fun bufferRetainsInclusiveBoundaryAndOrdersLateSamples() {
         val buffer = RingBufferManager(); buffer.add(Signal(100_000, "a", 1.0, "x")); buffer.add(Signal(40_000, "b", 2.0, "x")); buffer.add(Signal(39_999, "c", 3.0, "x"))
         assertEquals(listOf("b", "a"), buffer.snapshot(100_000).map { it.name })

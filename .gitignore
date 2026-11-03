@@ -4,3 +4,6 @@ build/
 **/build/
 local.properties
 *.iml
+.toolchains/
+.gradle-user-home/
+.android-user-home/
