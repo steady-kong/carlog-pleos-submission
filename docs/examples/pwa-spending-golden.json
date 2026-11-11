@@ -1,0 +1,117 @@
+{
+  "analyticsSha256": "cb21a9203616e8633ce0e65b6050726b9c177ff03cd7fa6ba3c5694a64a7dd13",
+  "modelsSha256": "d6da6c0f2a0b4667e0800284d940d5e553f943dd4cd22de240d3999a58cd34eb",
+  "timezone": "UTC",
+  "records": [
+    {
+      "type": "fuel",
+      "date": "2025-02-28T23:59:59.000Z",
+      "odometer": 1000,
+      "cost": 50000
+    },
+    {
+      "type": "maintenance",
+      "date": "2025-03-01T00:00:00.000Z",
+      "odometer": 1500,
+      "cost": 10000
+    },
+    {
+      "type": "expense",
+      "date": "2025-03-02T00:00:00.000Z",
+      "cost": 2000,
+      "category": "parking"
+    },
+    {
+      "type": "odometer",
+      "date": "2025-03-03T00:00:00.000Z",
+      "odometer": 1600,
+      "cost": 0
+    },
+    {
+      "type": "fuel",
+      "date": "2025-03-04T00:00:00.000Z",
+      "odometer": 9000,
+      "cost": 90000,
+      "deleted": true
+    }
+  ],
+  "fixtures": [
+    {
+      "start": null,
+      "expected": {
+        "total": 62000,
+        "fuel": 50000,
+        "maintenance": 10000,
+        "distance": 600,
+        "costPerKm": 103.33333333333333,
+        "categories": [
+          {
+            "key": "fuel",
+            "label": "주유",
+            "amount": 50000
+          },
+          {
+            "key": "maintenance",
+            "label": "정비",
+            "amount": 10000
+          },
+          {
+            "key": "parking",
+            "label": "주차",
+            "amount": 2000
+          }
+        ],
+        "monthly": [
+          {
+            "month": "2025-02",
+            "total": 50000
+          },
+          {
+            "month": "2025-03",
+            "total": 12000
+          }
+        ]
+      }
+    },
+    {
+      "start": "2025-03-01T00:00:00.000Z",
+      "expected": {
+        "total": 12000,
+        "fuel": 0,
+        "maintenance": 10000,
+        "distance": 100,
+        "costPerKm": 120,
+        "categories": [
+          {
+            "key": "maintenance",
+            "label": "정비",
+            "amount": 10000
+          },
+          {
+            "key": "parking",
+            "label": "주차",
+            "amount": 2000
+          }
+        ],
+        "monthly": [
+          {
+            "month": "2025-03",
+            "total": 12000
+          }
+        ]
+      }
+    },
+    {
+      "start": "2025-04-01T00:00:00.000Z",
+      "expected": {
+        "total": 0,
+        "fuel": 0,
+        "maintenance": 0,
+        "distance": 0,
+        "costPerKm": null,
+        "categories": [],
+        "monthly": []
+      }
+    }
+  ]
+}

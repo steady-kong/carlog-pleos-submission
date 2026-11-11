@@ -9,11 +9,11 @@
     "schemaVersion": { "const": 1 },
     "id": { "type": "string", "format": "uuid" },
     "vehicleId": { "type": "string", "format": "uuid" },
-    "occurredAt": { "type": "string", "format": "date-time" },
+    "occurredAt": { "type": "string", "format": "date-time", "pattern": "Z$" },
     "category": { "enum": ["vehicle_issue", "road_condition", "unusual_driving", "location_note", "general"] },
     "memo": { "type": "string" },
     "source": { "enum": ["MOCK", "VEHICLE"] },
-    "status": { "enum": ["collecting", "complete", "interrupted"] },
-    "samples": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["timestamp", "name", "value", "unit"], "properties": { "timestamp": { "type": "string", "format": "date-time" }, "name": { "type": "string" }, "value": { "type": "number" }, "unit": { "type": "string" } } } }
+    "status": { "enum": ["complete", "interrupted"] },
+    "samples": { "type": "array", "maxItems": 10000, "items": { "type": "object", "additionalProperties": false, "required": ["timestamp", "name", "value", "unit"], "properties": { "timestamp": { "type": "string", "format": "date-time", "pattern": "Z$" }, "name": { "type": "string", "minLength": 1, "maxLength": 256 }, "value": { "type": "number" }, "unit": { "type": "string", "maxLength": 64 } } } }
   }
 }

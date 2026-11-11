@@ -1,0 +1,323 @@
+{
+  "source": "src/db/analytics.ts",
+  "sourceSha256": "cb21a9203616e8633ce0e65b6050726b9c177ff03cd7fa6ba3c5694a64a7dd13",
+  "fixtures": [
+    {
+      "name": "empty",
+      "fuels": [],
+      "expected": {
+        "points": [],
+        "avgTrusted": null,
+        "recent": null,
+        "best": null,
+        "worst": null,
+        "trustedCount": 0,
+        "fillCount": 0
+      }
+    },
+    {
+      "name": "partial only",
+      "fuels": [
+        {
+          "date": "2025-01-01T00:00:00.000Z",
+          "odometer": 100,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-02T00:00:00.000Z",
+          "odometer": 300,
+          "amount": 20,
+          "isFullTank": false
+        }
+      ],
+      "expected": {
+        "points": [
+          {
+            "date": "2025-01-02T00:00:00.000Z",
+            "odometer": 300,
+            "amount": 20,
+            "distance": 200,
+            "kmPerL": 10,
+            "trusted": false
+          }
+        ],
+        "avgTrusted": null,
+        "recent": 10,
+        "best": null,
+        "worst": null,
+        "trustedCount": 0,
+        "fillCount": 2
+      }
+    },
+    {
+      "name": "backfilled weighted and deleted",
+      "fuels": [
+        {
+          "date": "2025-01-04T00:00:00.000Z",
+          "odometer": 700,
+          "amount": 10,
+          "isFullTank": false
+        },
+        {
+          "date": "2025-01-01T00:00:00.000Z",
+          "odometer": 100,
+          "amount": 20,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-02T00:00:00.000Z",
+          "odometer": 300,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-03T00:00:00.000Z",
+          "odometer": 600,
+          "amount": 30,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-05T00:00:00.000Z",
+          "odometer": 900,
+          "amount": 10,
+          "isFullTank": true,
+          "deletedAt": "2025-01-06T00:00:00.000Z"
+        }
+      ],
+      "expected": {
+        "points": [
+          {
+            "date": "2025-01-02T00:00:00.000Z",
+            "odometer": 300,
+            "amount": 10,
+            "distance": 200,
+            "kmPerL": 20,
+            "trusted": true
+          },
+          {
+            "date": "2025-01-03T00:00:00.000Z",
+            "odometer": 600,
+            "amount": 30,
+            "distance": 300,
+            "kmPerL": 10,
+            "trusted": true
+          },
+          {
+            "date": "2025-01-04T00:00:00.000Z",
+            "odometer": 700,
+            "amount": 10,
+            "distance": 100,
+            "kmPerL": 10,
+            "trusted": false
+          }
+        ],
+        "avgTrusted": 12.5,
+        "recent": 10,
+        "best": 20,
+        "worst": 10,
+        "trustedCount": 2,
+        "fillCount": 4
+      }
+    },
+    {
+      "name": "equal distance and zero fuel",
+      "fuels": [
+        {
+          "date": "2025-01-01T00:00:00.000Z",
+          "odometer": 10,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-02T00:00:00.000Z",
+          "odometer": 10,
+          "amount": 20,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-03T00:00:00.000Z",
+          "odometer": 20,
+          "amount": 0,
+          "isFullTank": true
+        }
+      ],
+      "expected": {
+        "points": [],
+        "avgTrusted": null,
+        "recent": null,
+        "best": null,
+        "worst": null,
+        "trustedCount": 0,
+        "fillCount": 3
+      }
+    },
+    {
+      "name": "partial fills keep last trusted result",
+      "fuels": [
+        {
+          "date": "2025-01-01T00:00:00.000Z",
+          "odometer": 100,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-02T00:00:00.000Z",
+          "odometer": 400,
+          "amount": 30,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-03T00:00:00.000Z",
+          "odometer": 500,
+          "amount": 5,
+          "isFullTank": false
+        },
+        {
+          "date": "2025-01-04T00:00:00.000Z",
+          "odometer": 600,
+          "amount": 10,
+          "isFullTank": true
+        }
+      ],
+      "expected": {
+        "points": [
+          {
+            "date": "2025-01-02T00:00:00.000Z",
+            "odometer": 400,
+            "amount": 30,
+            "distance": 300,
+            "kmPerL": 10,
+            "trusted": true
+          },
+          {
+            "date": "2025-01-03T00:00:00.000Z",
+            "odometer": 500,
+            "amount": 5,
+            "distance": 100,
+            "kmPerL": 20,
+            "trusted": false
+          },
+          {
+            "date": "2025-01-04T00:00:00.000Z",
+            "odometer": 600,
+            "amount": 10,
+            "distance": 100,
+            "kmPerL": 10,
+            "trusted": false
+          }
+        ],
+        "avgTrusted": 10,
+        "recent": 10,
+        "best": 10,
+        "worst": 10,
+        "trustedCount": 1,
+        "fillCount": 4
+      }
+    },
+    {
+      "name": "same odometer ordered by date",
+      "fuels": [
+        {
+          "date": "2025-01-03T00:00:00.000Z",
+          "odometer": 200,
+          "amount": 10,
+          "isFullTank": false
+        },
+        {
+          "date": "2025-01-01T00:00:00.000Z",
+          "odometer": 100,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-02T00:00:00.000Z",
+          "odometer": 200,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-04T00:00:00.000Z",
+          "odometer": 300,
+          "amount": 10,
+          "isFullTank": true
+        }
+      ],
+      "expected": {
+        "points": [
+          {
+            "date": "2025-01-02T00:00:00.000Z",
+            "odometer": 200,
+            "amount": 10,
+            "distance": 100,
+            "kmPerL": 10,
+            "trusted": true
+          },
+          {
+            "date": "2025-01-04T00:00:00.000Z",
+            "odometer": 300,
+            "amount": 10,
+            "distance": 100,
+            "kmPerL": 10,
+            "trusted": false
+          }
+        ],
+        "avgTrusted": 10,
+        "recent": 10,
+        "best": 10,
+        "worst": 10,
+        "trustedCount": 1,
+        "fillCount": 4
+      }
+    },
+    {
+      "name": "odometer order differs from chronological order",
+      "fuels": [
+        {
+          "date": "2025-01-01T00:00:00.000Z",
+          "odometer": 900,
+          "amount": 10,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-02T00:00:00.000Z",
+          "odometer": 100,
+          "amount": 20,
+          "isFullTank": true
+        },
+        {
+          "date": "2025-01-03T00:00:00.000Z",
+          "odometer": 300,
+          "amount": 20,
+          "isFullTank": true
+        }
+      ],
+      "expected": {
+        "points": [
+          {
+            "date": "2025-01-03T00:00:00.000Z",
+            "odometer": 300,
+            "amount": 20,
+            "distance": 200,
+            "kmPerL": 10,
+            "trusted": true
+          },
+          {
+            "date": "2025-01-01T00:00:00.000Z",
+            "odometer": 900,
+            "amount": 10,
+            "distance": 600,
+            "kmPerL": 60,
+            "trusted": true
+          }
+        ],
+        "avgTrusted": 26.666666666666668,
+        "recent": 60,
+        "best": 60,
+        "worst": 10,
+        "trustedCount": 2,
+        "fillCount": 3
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 2,
+  "id": "5a18ab5a-0a1e-4c91-b208-208a9e5cbf1d",
+  "vehicleId": "bcf4b06f-7654-4955-8d68-67c55fc01887",
+  "occurredAt": "2026-11-03T14:00:00Z",
+  "category": "road_condition",
+  "memo": "도로 상태 메모 (시뮬레이션)",
+  "source": "MOCK",
+  "status": "complete",
+  "samples": [
+    {
+      "timestamp": "2026-11-03T13:59:59Z",
+      "name": "odometer",
+      "value": 12500.5,
+      "unit": "km",
+      "timestampKind": "RECEIVED"
+    },
+    {
+      "timestamp": "2026-11-03T14:00:01Z",
+      "name": "fuel",
+      "value": 55.0,
+      "unit": "%",
+      "timestampKind": "MEASURED"
+    }
+  ]
+}

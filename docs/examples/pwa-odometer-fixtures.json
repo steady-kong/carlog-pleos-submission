@@ -1,0 +1,82 @@
+{
+  "source": "src/db/maintenance.ts",
+  "sourceSha256": "3048a9d3425797fc492f64e747e2f712cdc217bd0f30e6b8050acf88b78c1a6b",
+  "fixtures": [
+    {
+      "name": "empty",
+      "initial": 500,
+      "now": "2025-02-01T00:00:00Z",
+      "readings": [],
+      "expected": 500
+    },
+    {
+      "name": "short history",
+      "initial": 0,
+      "now": "2025-02-01T00:00:00Z",
+      "readings": [
+        {
+          "date": "2025-01-01T00:00:00Z",
+          "odometer": 100
+        },
+        {
+          "date": "2025-01-14T00:00:00Z",
+          "odometer": 300
+        }
+      ],
+      "expected": 300
+    },
+    {
+      "name": "fourteen days",
+      "initial": 0,
+      "now": "2025-01-16T00:00:00Z",
+      "readings": [
+        {
+          "date": "2025-01-01T00:00:00Z",
+          "odometer": 100
+        },
+        {
+          "date": "2025-01-15T00:00:00Z",
+          "odometer": 240
+        }
+      ],
+      "expected": 250
+    },
+    {
+      "name": "backfill and deleted",
+      "initial": 0,
+      "now": "2025-02-01T00:00:00Z",
+      "readings": [
+        {
+          "date": "2025-01-20T00:00:00Z",
+          "odometer": 250
+        },
+        {
+          "date": "2025-01-01T00:00:00Z",
+          "odometer": 300
+        },
+        {
+          "date": "2025-01-10T00:00:00Z",
+          "odometer": 900,
+          "deletedAt": "2025-01-11T00:00:00Z"
+        }
+      ],
+      "expected": 382
+    },
+    {
+      "name": "daily cap and large value",
+      "initial": 0,
+      "now": "2025-01-16T00:00:00Z",
+      "readings": [
+        {
+          "date": "2025-01-01T00:00:00Z",
+          "odometer": 3000000000
+        },
+        {
+          "date": "2025-01-15T00:00:00Z",
+          "odometer": 3000004200
+        }
+      ],
+      "expected": 3000004500
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "source": "src/db/maintenance.ts",
+  "sourceSha256": "3048a9d3425797fc492f64e747e2f712cdc217bd0f30e6b8050acf88b78c1a6b",
+  "timezone": "America/New_York",
+  "fixtures": [
+    {
+      "name": "distance_soon",
+      "schedule": {
+        "intervalDistance": 10000,
+        "lastDoneOdometer": 10000
+      },
+      "odometer": 19250,
+      "now": "2025-01-01T00:00:00Z",
+      "expected": {
+        "status": "soon",
+        "distance": 750,
+        "days": null,
+        "reason": "750km 남음"
+      }
+    },
+    {
+      "name": "distance_overdue",
+      "schedule": {
+        "intervalDistance": 10000,
+        "lastDoneOdometer": 10000
+      },
+      "odometer": 21001,
+      "now": "2025-01-01T00:00:00Z",
+      "expected": {
+        "status": "overdue",
+        "distance": -1001,
+        "days": null,
+        "reason": "1,001km 초과"
+      }
+    },
+    {
+      "name": "month_end",
+      "schedule": {
+        "intervalMonths": 6,
+        "lastDoneDate": "2024-08-31T00:00:00Z"
+      },
+      "odometer": 1000,
+      "now": "2025-02-28T00:00:00Z",
+      "expected": {
+        "status": "soon",
+        "distance": null,
+        "days": 1,
+        "reason": "1일 남음"
+      }
+    },
+    {
+      "name": "january_leap_month_end",
+      "schedule": {
+        "intervalMonths": 1,
+        "lastDoneDate": "2024-01-31T00:00:00Z"
+      },
+      "odometer": 0,
+      "now": "2024-02-29T00:00:00Z",
+      "expected": {
+        "status": "soon",
+        "distance": null,
+        "days": 1,
+        "reason": "1일 남음"
+      }
+    },
+    {
+      "name": "leap_day_next_year",
+      "schedule": {
+        "intervalMonths": 12,
+        "lastDoneDate": "2024-02-29T00:00:00Z"
+      },
+      "odometer": 0,
+      "now": "2025-02-28T00:00:00Z",
+      "expected": {
+        "status": "soon",
+        "distance": null,
+        "days": 1,
+        "reason": "1일 남음"
+      }
+    },
+    {
+      "name": "half_day_before",
+      "schedule": {
+        "intervalMonths": 1,
+        "lastDoneDate": "2025-01-31T00:00:00Z"
+      },
+      "odometer": 0,
+      "now": "2025-02-27T12:00:00Z",
+      "expected": {
+        "status": "soon",
+        "distance": null,
+        "days": 2,
+        "reason": "2일 남음"
+      }
+    },
+    {
+      "name": "half_day_after",
+      "schedule": {
+        "intervalMonths": 1,
+        "lastDoneDate": "2025-01-31T00:00:00Z"
+      },
+      "odometer": 0,
+      "now": "2025-02-28T12:00:00Z",
+      "expected": {
+        "status": "soon",
+        "distance": null,
+        "days": 1,
+        "reason": "1일 남음"
+      }
+    },
+    {
+      "name": "spring_forward_gap",
+      "schedule": {
+        "intervalMonths": 1,
+        "lastDoneDate": "2025-02-09T07:30:00Z"
+      },
+      "odometer": 0,
+      "now": "2025-03-09T07:30:00Z",
+      "expected": {
+        "status": "due",
+        "distance": null,
+        "days": 0,
+        "reason": "오늘"
+      }
+    },
+    {
+      "name": "fall_back_overlap",
+      "schedule": {
+        "intervalMonths": 1,
+        "lastDoneDate": "2025-10-02T05:30:00Z"
+      },
+      "odometer": 0,
+      "now": "2025-11-02T05:30:00Z",
+      "expected": {
+        "status": "due",
+        "distance": null,
+        "days": 0,
+        "reason": "오늘"
+      }
+    },
+    {
+      "name": "hours_soon",
+      "schedule": {
+        "intervalEngineHours": 100
+      },
+      "odometer": 1000,
+      "now": "2025-01-01T00:00:00Z",
+      "engineHours": 90,
+      "expected": {
+        "status": "soon",
+        "distance": null,
+        "days": null,
+        "reason": "10시간 남음"
+      }
+    },
+    {
+      "name": "distance_hours_tie",
+      "schedule": {
+        "intervalDistance": 10000,
+        "lastDoneOdometer": 10000,
+        "intervalEngineHours": 100
+      },
+      "odometer": 19500,
+      "now": "2025-01-01T00:00:00Z",
+      "engineHours": 95,
+      "expected": {
+        "status": "soon",
+        "distance": 500,
+        "days": null,
+        "reason": "500km 남음"
+      }
+    },
+    {
+      "name": "no_interval",
+      "schedule": {},
+      "odometer": 1000,
+      "now": "2025-01-01T00:00:00Z",
+      "expected": {
+        "status": "ok",
+        "distance": null,
+        "days": null,
+        "reason": "주기 미설정"
+      }
+    }
+  ]
+}

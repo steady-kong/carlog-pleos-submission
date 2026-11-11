@@ -1,0 +1,63 @@
+{
+  "format": "carlog-vehicle-records",
+  "schemaVersion": 1,
+  "exportedAt": "2025-01-01T00:00:00Z",
+  "vehicle": {
+    "id": "bcf4b06f-7654-4955-8d68-67c55fc01887",
+    "name": "차량",
+    "initialOdometerKm": 1000.0,
+    "maker": "현대",
+    "model": null,
+    "year": null,
+    "fuelType": "ev"
+  },
+  "records": [
+    {
+      "id": "5a18ab5a-0a1e-4c91-b208-208a9e5cbf1d",
+      "type": "fuel",
+      "occurredAt": "2025-01-01T00:00:00Z",
+      "odometerKm": 1200.0,
+      "amountLiters": 30.0,
+      "costKrw": 45000,
+      "label": "주유",
+      "fullTank": true,
+      "category": null,
+      "expenseCategoryCode": null,
+      "engineHours": null,
+      "engineHoursMode": null,
+      "updatedAt": null,
+      "relatedEventId": null,
+      "repairOutcome": null
+    },
+    {
+      "id": "56f54253-f9b3-4c04-90d4-b6bd32b3cfa9",
+      "type": "expense",
+      "occurredAt": "2025-01-01T00:00:00.001Z",
+      "odometerKm": null,
+      "amountLiters": null,
+      "costKrw": 2000,
+      "label": "주차",
+      "fullTank": null,
+      "category": "주차",
+      "expenseCategoryCode": "parking",
+      "engineHours": null,
+      "engineHoursMode": null,
+      "updatedAt": null,
+      "relatedEventId": null,
+      "repairOutcome": null
+    }
+  ],
+  "schedules": [
+    {
+      "id": "70532abf-1669-47c3-926e-81307cb985ea",
+      "label": "오일",
+      "lastOdometerKm": 1000.0,
+      "intervalKm": 5000.0,
+      "intervalMonths": null,
+      "lastDoneAt": null,
+      "intervalEngineHours": null,
+      "category": null,
+      "updatedAt": null
+    }
+  ]
+}
