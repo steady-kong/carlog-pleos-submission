@@ -1201,7 +1201,8 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
             } else {
             var showAllEvents by rememberSaveable { mutableStateOf(false) }
             val actions: @Composable () -> Unit = {
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(CarlogSpace.Gap)) {
+                    Text("순간 기록", style = MaterialTheme.typography.titleLarge)
                     CarlogHeroAction(enabled = captureReady && !captureTransitioning && !markRequesting, requesting = markRequesting, onClick = {
                         voiceMessage = null
                         vm.mark("일반 이벤트", "") { }
@@ -1236,17 +1237,23 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
                             HmiStatus("사후 데이터 수집 중", if (remaining > 0) "약 ${remaining}초 남음 · 아직 수집 완료 전" else "수집 데이터 저장 확인 중", HmiTone.Progress,
                                 ((now - recentCapture.timestamp) / 60_000f).coerceIn(0f, .99f))
                         }
-                        recentCapture?.status == "complete" -> HmiStatus("최근 이벤트 수집 완료", "저장된 신호를 상세에서 확인하세요.", HmiTone.Success)
+                        recentCapture?.status == "complete" -> HmiStatus("최근 이벤트 수집 완료", tone = HmiTone.Success)
                         recentCapture?.status == "interrupted" -> HmiStatus("최근 이벤트 수집 중단", "확보된 신호는 상세에서 확인하세요.", HmiTone.Error)
-                        else -> HmiStatus("기록 대기", "버튼 한 번으로 이벤트를 기록합니다.")
+                        else -> HmiStatus("기록 대기")
                     }
                     voiceMessage?.let { HmiStatus(it, tone = voiceTone) }
             }
             }
             val timeline: @Composable () -> Unit = {
-            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("최근 이벤트", style = MaterialTheme.typography.headlineSmall)
-            if (events.isEmpty()) HmiEmptyState("아직 기록된 이벤트가 없습니다.", "기록한 순간과 수집 상태가 여기에 표시됩니다.")
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(CarlogSpace.Gap)) {
+            Text("최근 이벤트", style = MaterialTheme.typography.titleLarge)
+            if (events.isEmpty()) {
+                Row(Modifier.fillMaxWidth().padding(vertical = CarlogSpace.Small),
+                    horizontalArrangement = Arrangement.spacedBy(CarlogSpace.Gap), verticalAlignment = Alignment.CenterVertically) {
+                    HmiIcon(HmiSymbol.History, Modifier.size(28.dp), CarlogColors.TertiaryText)
+                    Text("아직 기록된 이벤트가 없습니다.", style = MaterialTheme.typography.bodyMedium, color = CarlogColors.SecondaryText)
+                }
+            }
             events.take(if (showAllEvents) visibleTimelineCount else 3).forEachIndexed { index, event ->
                 OutlinedCard(
                     onClick = { selectedId = event.id; navigationScope.launch { eventScroll.scrollTo(0) } },
@@ -1254,14 +1261,14 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
                         contentDescription = "이벤트 ${index + 1}, ${date(event.timestamp)}, ${event.category}, ${eventStatusLabel(event.status)}, ${eventSourceLabel(event.source)}, 메모: ${eventMemoPreview(event.memo)}, ID ${event.id}"
                     }
                 ) {
-                    Row(Modifier.fillMaxWidth().padding(20.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
                         EventCategoryIcon(event.category)
-                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(event.category, style = MaterialTheme.typography.titleLarge)
                             Text(date(event.timestamp), style = MaterialTheme.typography.bodyMedium, color = CarlogColors.SecondaryText)
                             Text(eventStatusLabel(event.status), style = MaterialTheme.typography.labelMedium,
                                 color = when(event.status) { "complete" -> CarlogColors.Success; "collecting" -> CarlogColors.Info; else -> CarlogColors.Error })
-                            Text("메모: ${eventMemoPreview(event.memo)}", style = MaterialTheme.typography.bodyMedium)
+                            if (event.memo.isNotBlank()) Text(eventMemoPreview(event.memo), maxLines = 2, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, style = MaterialTheme.typography.bodyMedium)
 
                         }
                         HmiIcon(HmiSymbol.Arrow, Modifier.size(24.dp), tint = CarlogColors.TertiaryText)
@@ -1278,13 +1285,18 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
             }
             }
             BoxWithConstraints(Modifier.fillMaxWidth()) {
-                if (maxWidth >= 700.dp) {
-                    Row(Modifier.fillMaxWidth().heightIn(min = ((androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp - 120) * .52f).dp.coerceIn(360.dp, 560.dp)).padding(vertical = 24.dp), horizontalArrangement = Arrangement.spacedBy(32.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Box(Modifier.weight(1.05f)) { actions() }
-                        Box(Modifier.weight(1f)) { timeline() }
+                val wide = maxWidth >= 700.dp
+                if (wide) {
+                    Row(Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(CarlogSpace.Gap), verticalAlignment = Alignment.Top) {
+                        Box(Modifier.weight(.55f).padding(CarlogSpace.Inset)) { actions() }
+                        Box(Modifier.weight(.45f).padding(CarlogSpace.Inset)) { timeline() }
                     }
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) { actions(); timeline() }
+                    Column(verticalArrangement = Arrangement.spacedBy(CarlogSpace.Section)) {
+                        actions()
+                        timeline()
+                    }
                 }
             }
             shareCleanupMessage?.let { Text(it) }
