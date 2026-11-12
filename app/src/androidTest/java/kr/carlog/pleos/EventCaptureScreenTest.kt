@@ -84,6 +84,8 @@ class EventCaptureScreenTest {
         try {
             compose.setContent { CarlogTheme { Screen(vm, uxState = VehicleUxState.Unrestricted) } }
             compose.waitUntil(15_000) { vm.captureReady.value }
+            compose.waitUntil(10_000) { vm.oldestPreEventSampleAge.value != null }
+            compose.onNodeWithText("현재 사전 버퍼: 가장 오래된 신호", substring = true).assertExists()
             compose.onNodeWithText("지금 이벤트 기록").performScrollTo().performClick()
             compose.waitUntil(10_000) { vm.events.value.isNotEmpty() }
             val event = vm.events.value.single()
@@ -92,6 +94,9 @@ class EventCaptureScreenTest {
             assertEquals("일반 이벤트", event.category)
             assertEquals("", event.memo)
             compose.onNodeWithContentDescription("이벤트 1,", substring = true).performScrollTo().performClick()
+            compose.waitUntil(10_000) {
+                compose.onAllNodesWithText("저장된 사전 신호: 가장 오래된 신호", substring = true).fetchSemanticsNodes().isNotEmpty()
+            }
             compose.onNodeWithText("분류·메모 수정").performScrollTo().performClick()
             compose.onNodeWithText("도로 상태").performClick()
             compose.onNodeWithText("메모").performTextInput("노면 요철")

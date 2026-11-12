@@ -1009,6 +1009,11 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
         full = true; expenseCategory = "기타"; incrementalHours = false; isOil = false
         entryError = null; editingId = null; editingBaseline = null; linkedEventId = null; repairOutcome = ""
     }
+    fun openRecordEntry() {
+        recordEntryExpanded = true
+        focusManager.clearFocus()
+        navigationScope.launch { managementScroll.animateScrollTo(recordsTarget) }
+    }
     fun entrySnapshot(): List<Any?> = listOf(type, label, km, amount, cost, full, expenseCategory, engineHours,
         incrementalHours, intervalMonths, lastDoneDate, intervalHours, isOil, recordDate, editingId, editingBaseline, linkedEventId, repairOutcome)
     LaunchedEffect(currentVehicle?.id) {
@@ -1228,6 +1233,12 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
                             voiceMessage = "음성 인식 앱을 열 수 없습니다. 기록 버튼을 이용해 주세요."
                         }
                     })
+                    Text(
+                        if (!captureReady || captureTransitioning) "현재 사전 버퍼: 수집 중단 또는 연결 대기"
+                        else oldestPreEventSampleAge?.let { "현재 사전 버퍼: 가장 오래된 신호 ${it / 1000}초 전 · 연속 수집 보장 안 됨" }
+                            ?: "현재 사전 버퍼: 신호 대기 중",
+                        style = MaterialTheme.typography.bodyMedium, color = CarlogColors.SecondaryText,
+                    )
                     val recentCapture = events.firstOrNull { it.status == "collecting" } ?: events.firstOrNull()
                     when {
                         captureError != null -> HmiStatus("수집·저장 오류", captureError, HmiTone.Error)
@@ -1353,7 +1364,7 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
                     }
                 }
             }
-            CarlogSecondaryAction(label = "기록 추가", symbol = HmiSymbol.Plus, onClick = { recordEntryExpanded = true; focusManager.clearFocus(); navigationScope.launch { managementScroll.animateScrollTo(recordsTarget) } })
+            CarlogSecondaryAction(label = "기록 추가", symbol = HmiSymbol.Plus, onClick = { openRecordEntry() })
             TextButton(onClick = { managementDetailsExpanded = !managementDetailsExpanded }) { Text(if (managementDetailsExpanded) "차량 및 통계 상세 접기" else "차량 및 통계 상세 보기") }
             if (managementDetailsExpanded) {
             Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
@@ -1629,6 +1640,12 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
             if (editingId != null) TextButton(onClick = { clearEntry(); vm.clearRecordError() }) { Text("수정 취소") }
             }
             Text("전체 차량 기록", style = MaterialTheme.typography.titleLarge)
+            if (records.isEmpty()) {
+                HmiEmptyState("차량 기록 없음", "주행거리, 주유, 정비 또는 지출 기록을 추가해 보세요.")
+                if (!recordEntryExpanded) {
+                    CarlogSecondaryAction(label = "첫 기록 추가", symbol = HmiSymbol.Plus, onClick = { openRecordEntry() })
+                }
+            }
             records.take(visibleRecordCount).forEach { record ->
                 Text("${date(record.timestamp)} · ${record.type} ${record.label} · ${if (record.odometerKnown) "${record.odometer} km" else "주행거리 미입력"} · ${record.cost}원")
                 recordDetails(record)?.let { Text(it) }
@@ -1760,6 +1777,14 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
                 }
                 Text(date(event.timestamp), style = MaterialTheme.typography.titleMedium, color = CarlogColors.SecondaryText)
                 Text("${eventStatusLabel(event.status)} · ${eventSourceLabel(event.source)}", style = MaterialTheme.typography.bodyMedium, color = CarlogColors.SecondaryText)
+                if (loadedSamples == null) Text("저장된 사전 신호 확인 중")
+                else {
+                    val earliestPre = samples.asSequence().map { it.timestamp }
+                        .filter { it <= event.timestamp && it >= event.timestamp.coerceAtLeast(Long.MIN_VALUE + 60_000) - 60_000 }
+                        .minOrNull()
+                    Text(earliestPre?.let { "저장된 사전 신호: 가장 오래된 신호 발생 ${(event.timestamp - it) / 1000}초 전 · 연속 수집 보장 안 됨" }
+                        ?: "저장된 사전 신호 없음", style = MaterialTheme.typography.bodyMedium, color = CarlogColors.SecondaryText)
+                }
                 HorizontalDivider(color = CarlogColors.Border)
                 Text(event.memo.ifBlank { "메모 없음" }, style = MaterialTheme.typography.bodyLarge)
                 OutlinedButton(enabled = !editSaving, onClick = { editBaseline = event; editCategory = event.category; editMemo = event.memo; vm.clearEventEditError(); editing = true }, modifier = Modifier.heightIn(min = 52.dp)) { Text("분류·메모 수정") }
