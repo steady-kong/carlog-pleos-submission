@@ -4,6 +4,11 @@ Carlog Pleos의 사용자에게 보이는 기능과 중요한 개발 환경 변�
 형식은 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)의 Added, Changed, Fixed, Removed 분류를 따른다.
 아직 정식 배포 버전이 없으므로 변경은 `[Unreleased]` 아래에 모은다.
 
+## 2026-11-14 공모전 APK 준비
+
+- Mock 기반 release APK를 서명하고 Pleos 전용 에뮬레이터에서 설치·실행을 확인했다. 제출 경로와 시연 환경은 [README](README.md)에 기재했다.
+- 이 저장소에 GitHub noreply 작성자 설정과 커밋 전 개인정보 검사 훅을 적용했다. 기존 Git 이력은 유지한다.
+
 ## 2026-11-12 제출 전 안내와 검증
 
 - 이벤트 화면에 현재 사전 관측 범위를, 상세에 저장된 사전 신호 범위를 표시하고 연속 수집을 보장하지 않음을 안내한다. 차량 기록이 비었을 때 안내와 기록 추가 동선을 제공한다.

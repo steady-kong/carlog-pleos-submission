@@ -27,6 +27,7 @@ service-account*.json
 
 # Local SDK/emulator distributions, captures and build artifacts
 *.apk
+!apk/공성준_Carlog_release.apk
 *.aab
 *.aar
 *.img
