@@ -4,6 +4,10 @@ Carlog Pleos의 사용자에게 보이는 기능과 중요한 개발 환경 변�
 형식은 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)의 Added, Changed, Fixed, Removed 분류를 따른다.
 아직 정식 배포 버전이 없으므로 변경은 `[Unreleased]` 아래에 모은다.
 
+## 2026-11-15 프로젝트 목적 안내
+
+- README 도입부에 이벤트 기록과 정비 결과를 연결해 운전자와 정비사의 상황 전달을 돕는 목적을 명시했다.
+
 ## 2026-11-14 공모전 APK 준비
 
 - Mock 기반 release APK를 서명하고 Pleos 전용 에뮬레이터에서 설치·실행을 확인했다. 제출 경로와 시연 환경은 [README](README.md)에 기재했다.
