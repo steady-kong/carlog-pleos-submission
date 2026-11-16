@@ -44,3 +44,6 @@ service-account*.json
 *.mp4
 *.wav
 *.pcm
+
+# README에 사용할 Mock 시연 화면만 추적
+!docs/images/event-screen.png
