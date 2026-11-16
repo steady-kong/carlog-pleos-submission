@@ -970,6 +970,7 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
     var spendingPeriod by rememberSaveable { mutableStateOf(SpendingPeriod.ALL) }
     var managementDetailsExpanded by rememberSaveable { mutableStateOf(false) }
     var recordPreview by remember { mutableStateOf<RecordEntity?>(null) }
+    var managementCategory by rememberSaveable { mutableStateOf<String?>(null) }
     var recordEntryExpanded by rememberSaveable { mutableStateOf(false) }
     var visibleRecordCount by rememberSaveable { mutableIntStateOf(20) }
     var visibleTimelineCount by rememberSaveable { mutableIntStateOf(20) }
@@ -1336,6 +1337,57 @@ class MainActivity : ComponentActivity() { override fun onCreate(savedInstanceSt
             val monthWallet = spendingStats(records, startMillis = monthStart)
             val monthRecords = records.filter { it.deletedAt == null && (monthStart == null || it.timestamp >= monthStart) }
             val fuelSignal = latest["fuel"]?.takeIf { it.unit == "%" && it.value.isFinite() && it.value in 0.0..100.0 }
+            Text("차량 관리", style = MaterialTheme.typography.titleLarge)
+            Text("기록할 항목을 선택하세요", style = MaterialTheme.typography.bodyMedium, color = CarlogColors.SecondaryText)
+            val hasEntryDraft = label.isNotBlank() || km.isNotBlank() || amount.isNotBlank() || cost.isNotBlank() ||
+                engineHours.isNotBlank() || intervalMonths.isNotBlank() || lastDoneDate.isNotBlank() ||
+                intervalHours.isNotBlank() || recordDate.isNotBlank() || repairOutcome.isNotBlank() || linkedEventId != null ||
+                !full || expenseCategory != "기타" || incrementalHours || isOil
+            val shortcuts = listOf("주유" to HmiSymbol.Record, "소모품" to HmiSymbol.Tools,
+                "정비" to HmiSymbol.Tools, "지출" to HmiSymbol.Record)
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val columns = if (maxWidth >= 700.dp) 4 else 2
+                Column(verticalArrangement = Arrangement.spacedBy(CarlogSpace.Gap)) {
+                    shortcuts.chunked(columns).forEach { row ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(CarlogSpace.Gap)) {
+                            row.forEach { (shortcutType, symbol) ->
+                                CarlogSecondaryAction(
+                                    label = "$shortcutType 목록", symbol = symbol,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { managementCategory = if (managementCategory == shortcutType) null else shortcutType },
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            managementCategory?.let { category ->
+                Card(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(CarlogSpace.Gap)) {
+                        Text("$category 목록", style = MaterialTheme.typography.titleMedium)
+                        if (category == "소모품") {
+                            val items = schedules.filter { it.deletedAt == null }
+                            if (items.isEmpty()) Text("등록된 소모품 주기가 없습니다.")
+                            items.take(3).forEach { Text("${it.label} · 마지막 교체 ${"%.0f".format(it.lastKm)} km") }
+                            if (items.size > 3) Text("전체 ${items.size}개 · 아래 소모품 관리에서 확인")
+                        } else {
+                            val items = records.filter { it.deletedAt == null && it.type == category }
+                            if (items.isEmpty()) Text("등록된 $category 기록이 없습니다.")
+                            items.take(3).forEach { record ->
+                                Surface(onClick = { recordPreview = record }, modifier = Modifier.fillMaxWidth()) {
+                                    Text("${record.label.ifBlank { record.type }} · ${date(record.timestamp)} · ${record.cost}원", Modifier.padding(12.dp))
+                                }
+                            }
+                            if (items.size > 3) Text("전체 ${items.size}개 · 아래 전체 차량 기록에서 확인")
+                        }
+                        CarlogSecondaryAction(label = "$category 기록 추가", symbol = HmiSymbol.Plus,
+                            enabled = !recordSaving && editingId == null && (!hasEntryDraft || type == category),
+                            onClick = { type = category; openRecordEntry() })
+                        if (editingId != null || (hasEntryDraft && type != category))
+                            Text("작성 중인 기록을 저장하거나 입력 내용을 비워 주세요.", style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
             ManagementDashboard(
                 vehicle = currentVehicle?.name ?: "정보 없음",
                 distance = recordedDistance?.let { "%.0f km".format(it) } ?: "기록 없음",
